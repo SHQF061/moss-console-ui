@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MOSS · 控制台</title>
+<style>
+:root{
+  --page:#0B0F16; --bg:#131A26; --panel-2:#1B2434;
+  --border:rgba(255,255,255,.07); --border-2:rgba(255,255,255,.13);
+  --ink-1:#EAF0F8; --ink-2:#A9B5C7; --ink-3:#6E7B91;
+  --accent:#E8443A; --accent-2:#E8B34B; --accent-soft:rgba(232,68,58,.13);
+  --on-accent:#FFF; --glow:rgba(232,68,58,.30);
+  --ok:#4ED09A; --warn:#E8A33D;
+  --r:4px; --r-pill:999px; --side:248px; --row:42px;
+  --sans:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code","Consolas",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--page);color:var(--ink-1);font-family:var(--sans);font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow:hidden}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;min-height:28px}
+a{color:inherit;text-decoration:none}
+table{border-collapse:collapse;width:100%}
+svg{display:block}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+.app{display:grid;grid-template-columns:var(--side) 1fr;height:100vh}
+.side{background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;padding:14px 10px 12px;gap:8px}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 14px}
+.eye{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#ff8a7a 0%,#E8443A 38%,#5a0d08 72%,transparent 78%);box-shadow:0 0 14px var(--glow),0 0 38px rgba(232,68,58,.25);animation:breathe 4s ease-in-out infinite;flex:none}
+@keyframes breathe{0%,100%{box-shadow:0 0 12px rgba(232,68,58,.55),0 0 30px rgba(232,68,58,.2)}50%{box-shadow:0 0 22px var(--glow),0 0 55px rgba(232,68,58,.4)}}
+.brand-bt{display:flex;flex-direction:column;line-height:1.2}
+.brand-bt b{font-family:var(--mono);font-size:15px;letter-spacing:.42em;color:#F4F7FB;font-weight:600}
+.brand-bt span{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;color:var(--ink-3);margin-top:3px}
+.newchat{width:100%;height:38px;border:1px solid var(--border-2);border-radius:var(--r);background:rgba(255,255,255,.025);color:var(--ink-1);font-size:12.5px;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;gap:7px}
+.newchat:hover{background:rgba(255,255,255,.06)}
+.nav{display:flex;flex-direction:column;gap:1px;margin-top:4px}
+.nav-item{position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);color:var(--ink-2);font-size:12.5px;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--ink-1)}
+.nav-item.on{background:rgba(232,68,58,.10);color:var(--ink-1)}
+.nav-item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:2px;background:var(--accent);box-shadow:0 0 8px var(--glow)}
+.nav-sep{height:1px;background:var(--border);margin:6px 4px}
+.side-sec{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:0 6px;font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--ink-3)}
+.recent{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.recent-item{display:flex;align-items:baseline;gap:8px;padding:6px 9px;border-radius:var(--r);color:var(--ink-2);font-size:11.5px;cursor:pointer}
+.recent-item:hover{background:rgba(255,255,255,.04)}
+.recent-item .rt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-item .tm{font-family:var(--mono);font-size:8.5px;color:var(--ink-3)}
+.side-foot{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.mini-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink-3)}
+.mini-row b{margin-left:auto;color:var(--ink-2);font-weight:500;font-size:10px}
+.mini-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:4px}
+.mini-bar i{display:block;height:100%;background:linear-gradient(90deg,#7a2320,var(--accent))}
+.mini-bar.gpu i{background:linear-gradient(90deg,#1d5c43,var(--ok))}
+.eng-line{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink-2)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+.dot.on{background:var(--ok);box-shadow:0 0 8px rgba(78,208,154,.7)}
+.dot.off{background:var(--accent);box-shadow:0 0 8px var(--glow)}
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.top{height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;border-bottom:1px solid var(--border);background:rgba(19,26,38,.6)}
+.crumb{color:var(--ink-3);font-size:12px}
+.top h1{font-size:15px;font-weight:600;letter-spacing:.04em}
+.top .sp{margin-left:auto}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r-pill);font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink-2);white-space:nowrap}
+.chip.alert{border-color:rgba(232,68,58,.4);color:var(--accent);background:var(--accent-soft)}
+.clock{display:flex;align-items:baseline;gap:6px;font-family:var(--mono)}
+.clock b{font-size:12px;letter-spacing:.1em;color:var(--ink-1);font-weight:500}
+.clock em{font-style:normal;font-size:8px;letter-spacing:.2em;color:var(--accent)}
+.body{flex:1;min-height:0;overflow-y:auto;padding:14px 20px 18px;display:flex;flex-direction:column;gap:12px}
+.kpis{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px}
+.kpi{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px 10px}
+.kpi.primary{border-color:rgba(232,68,58,.35);background:linear-gradient(180deg,rgba(232,68,58,.08),var(--bg) 60%)}
+.kpi .k{display:flex;align-items:center;gap:8px;color:var(--ink-3);font-size:11px;letter-spacing:.08em;font-family:var(--mono)}
+.kpi .v{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.2;margin-top:6px}
+.kpi .v em{font-size:11px;font-style:normal;color:var(--ink-3);font-weight:400;margin-left:4px}
+.kpi .sub{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);margin-top:6px}
+.kpi .sub b{color:var(--ink-2);font-weight:500}
+.kpi .sub .up{color:var(--ok)}
+.kpi .sub .warn{color:var(--warn)}
+.panel{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.panel>header{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.panel>header h2{font-size:13px;font-weight:600}
+.panel>header .meta{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--ink-3)}
+.panel>.pad{padding:12px 16px 14px}
+.duo{display:grid;grid-template-columns:1.7fr 1fr;gap:12px}
+.tri{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}
+th,td{text-align:left;padding:0 16px;height:var(--row);border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px}
+th{color:var(--ink-3);font-weight:500;font-size:10.5px;letter-spacing:.12em;font-family:var(--mono);background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px}
+.avatar{width:22px;height:22px;border-radius:var(--r-pill);background:var(--panel-2);display:grid;place-items:center;font-family:var(--mono);font-size:9px;color:var(--ink-2);flex:none}
+.avatar.moss{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.title-cell{color:var(--ink-1)}
+.sub-cell{color:var(--ink-3);font-size:11px;margin-top:1px}
+.tag{display:inline-block;padding:2px 8px;border-radius:var(--r-pill);font-size:10.5px;font-family:var(--mono)}
+.tag.ok{background:rgba(78,208,154,.12);color:#7FE4B8}
+.tag.warn{background:rgba(232,163,61,.13);color:#F2C27A}
+.tag.bad{background:rgba(232,68,58,.13);color:#F08880}
+.tag.mut{background:rgba(255,255,255,.05);color:var(--ink-2)}
+.feed{font-family:var(--mono);font-size:11px;line-height:1.55;overflow-y:auto;max-height:340px}
+.ev{padding:7px 16px;border-bottom:1px solid var(--border)}
+.ev .t{color:var(--ink-3);font-size:9.5px;display:block;margin-bottom:2px}
+.ev .body{color:var(--ink-2)}
+.ev .body b{color:var(--accent-2);font-weight:500}
+.ev .body .ok{color:var(--ok)}
+.res-chart{width:100%;height:130px}
+.plug-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.plug-ic{width:30px;height:30px;border-radius:var(--r);background:var(--panel-2);display:grid;place-items:center;flex:none}
+.plug-meta{flex:1;min-width:0}
+.plug-meta b{font-size:12.5px;display:block}
+.plug-meta span{font-family:var(--mono);font-size:9.5px;color:var(--ink-3)}
+.switch{width:32px;height:18px;border-radius:var(--r-pill);background:var(--panel-2);position:relative;transition:background .15s;flex:none}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--ink-3);transition:transform .15s}
+.switch.on{background:rgba(78,208,154,.3)}
+.switch.on::after{transform:translateX(14px);background:var(--ok)}
+.view{display:none;flex-direction:column;gap:14px;min-height:0}
+.view.on{display:flex}
+.chat-wrap{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--r)}
+.chat-log{flex:1;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:18px}
+.msg{max-width:760px;width:100%;display:flex;gap:11px}
+.msg .bubble{flex:1;min-width:0}
+.msg .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--ink-3);margin-bottom:5px}
+.msg .text{font-size:13.5px;line-height:1.75;color:var(--ink-2)}
+.msg.user{margin-left:auto;flex-direction:row-reverse}
+.msg.user .bubble{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px}
+.tool-call{margin-top:8px;border:1px dashed var(--border-2);border-radius:var(--r);padding:8px 11px;font-family:var(--mono);font-size:10.5px;color:var(--ink-2);display:flex;align-items:center;gap:10px}
+.tool-call .name{color:var(--accent-2)}
+.tool-call .st{margin-left:auto;color:var(--ok)}
+.composer{padding:10px 26px 14px;border-top:1px solid var(--border)}
+.composer-box{border:1px solid var(--border-2);border-radius:var(--r);background:var(--panel-2)}
+.composer-box:focus-within{border-color:rgba(232,68,58,.5);box-shadow:0 0 0 3px rgba(232,68,58,.12)}
+.composer textarea{width:100%;min-height:46px;padding:11px 13px 4px;background:transparent;border:0;outline:none;resize:none;color:var(--ink-1);font-family:inherit;font-size:13px}
+.composer-bar{display:flex;align-items:center;gap:10px;padding:0 10px 9px}
+.mode-pill{font-family:var(--mono);font-size:9px;color:var(--ink-3);border:1px solid var(--border);padding:2px 8px;border-radius:var(--r-pill)}
+.hint{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--ink-3)}
+.btn{border:1px solid var(--border-2);border-radius:var(--r);padding:6px 14px;font-size:12px;color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+[data-state]{display:none}
+[data-state].on{display:block}
+.empty,.loading,.error{display:grid;place-items:center;gap:10px;padding:60px 20px;text-align:center;color:var(--ink-3)}
+.empty b,.error b{color:var(--ink-1);font-size:15px;font-weight:600}
+.seg{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.seg span{padding:5px 12px;font-size:11.5px;color:var(--ink-2);cursor:pointer;font-family:var(--mono)}
+.seg span.on{background:var(--accent-soft);color:var(--accent)}
+.scrim{position:fixed;inset:0;background:rgba(5,8,13,.7);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .18s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);z-index:41;width:min(520px,92vw);background:var(--bg);border:1px solid var(--border-2);border-radius:var(--r);padding:22px;opacity:0;pointer-events:none;transition:.18s;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.modal .kicker{font-family:var(--mono);font-size:9px;letter-spacing:.32em;color:var(--accent)}
+.modal h3{font-size:16px;margin:8px 0 6px}
+.modal p{color:var(--ink-2);font-size:12.5px;line-height:1.6}
+.modal pre{margin-top:12px;background:#0A0E16;border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;font-family:var(--mono);font-size:11px;line-height:1.65;color:var(--ink-2);white-space:pre-wrap}
+.modal .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.modal .warn-note{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:9px 11px;background:rgba(232,163,61,.08);border:1px solid rgba(232,163,61,.25);border-radius:var(--r);font-size:11.5px;color:var(--warn)}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+<div class="brand"><span class="eye"></span><div class="brand-bt"><b>MOSS</b><span>550W · UNION GOV</span></div></div>
+<button class="newchat">+ 新会话</button>
+<nav class="nav">
+<button class="nav-item on" data-view="dash">▦ 总览</button>
+<button class="nav-item" data-view="chat">对话</button>
+<button class="nav-item" data-view="traj">轨迹审计</button>
+<div class="nav-sep"></div>
+<button class="nav-item">插件</button>
+<button class="nav-item">模型</button>
+<button class="nav-item">设置</button>
+</nav>
+<div class="side-sec"><div class="sec-head"><span>最近会话</span></div>
+<div class="recent">
+<div class="recent-item"><span class="rt">清点当前系统进程并写入日志</span><span class="tm">12:04</span></div>
+<div class="recent-item"><span class="rt">读取 D:\\models\\ 目录下的 .gguf 清单</span><span class="tm">11:48</span></div>
+<div class="recent-item"><span class="rt">把剪贴板内容总结成三句话</span><span class="tm">昨</span></div>
+<div class="recent-item"><span class="rt">MOSS 运行时为什么会占用 8GB 内存</span><span class="tm">昨</span></div>
+</div></div>
+<div class="side-foot">
+<div><div class="mini-row"><span>CPU</span><b class="num">37%</b></div><div class="mini-bar"><i style="width:37%"></i></div></div>
+<div><div class="mini-row"><span>MEM</span><b class="num">62%</b></div><div class="mini-bar"><i style="width:62%"></i></div></div>
+<div><div class="mini-row"><span>GPU</span><b class="num">41%</b></div><div class="mini-bar gpu"><i style="width:41%"></i></div></div>
+<div class="eng-line"><span class="dot on"></span><span>引擎在线</span></div>
+</div></aside>
+<main class="main">
+<header class="top"><span class="crumb">MOSS /</span><h1 id="pageTitle">总览</h1><span class="sp"></span><span class="chip alert"><span class="dot off"></span>待审批 1</span><span class="chip">事件 128</span><span class="clock"><b class="num" id="clock">18:52:11</b><em>UTC+8</em></span></header>
+<div class="body">
+<section class="view on" id="view-dash">
+<div data-state="data" class="on" style="display:flex;flex-direction:column;gap:14px">
+<div class="kpis">
+<div class="kpi primary"><div class="k">◉ 引擎状态</div><div class="v" style="color:var(--ok)">● ONLINE</div><div class="sub">qwen2.5-7b-instruct · 上下文 8192</div></div>
+<div class="kpi"><div class="k">进行中会话</div><div class="v num">3<em>个</em></div><div class="sub">▲ 较昨日 +1</div></div>
+<div class="kpi"><div class="k">工具调用 · 近 1h</div><div class="v num">27<em>次</em></div><div class="sub">成功率 96.3%</div></div>
+<div class="kpi"><div class="k">待审批操作</div><div class="v num" style="color:var(--accent)">1<em>条</em></div><div class="sub">● 等待操作员授权</div></div>
+</div>
+<div class="duo">
+<div class="panel"><header>活跃会话<span class="meta">最近 24 小时 · 共 12 条</span></header>
+<table><thead><tr><th>会话</th><th>模型</th><th>消息</th><th>状态</th><th>更新</th></tr></thead>
+<tbody>
+<tr><td><b>清点当前系统进程并写入日志</b><br><span style="color:var(--ink-3);font-size:11px">MOSS 正在调用 shell.exec</span></td><td class="n">qwen-7b</td><td class="n">14</td><td><span class="tag warn">执行中</span></td><td class="n">now</td></tr>
+<tr><td><b>读取 D:\\models\\ 目录下的 .gguf 清单</b><br><span style="color:var(--ink-3);font-size:11px">已枚举 6 个模型文件</span></td><td class="n">qwen-7b</td><td class="n">9</td><td><span class="tag ok">完成</span></td><td class="n">4m</td></tr>
+<tr><td><b>把剪贴板内容总结成三句话</b><br><span style="color:var(--ink-3);font-size:11px">剪贴板插件已返回 214 字</span></td><td class="n">qwen-7b</td><td class="n">5</td><td><span class="tag ok">完成</span></td><td class="n">1h</td></tr>
+<tr><td><b>MOSS 运行时为什么会占用 8GB 内存</b><br><span style="color:var(--ink-3);font-size:11px">已给出 llama.cpp KV cache 估算</span></td><td class="n">qwen-7b</td><td class="n">22</td><td><span class="tag mut">已归档</span></td><td class="n">3h</td></tr>
+<tr><td><b>写一个每小时记录一次 CPU 温度的脚本</b><br><span style="color:var(--ink-3);font-size:11px">等待审批：shell.exec 写入 temp.ps1</span></td><td class="n">qwen-7b</td><td class="n">31</td><td><span class="tag bad">待审批</span></td><td class="n">5h</td></tr>
+</tbody></table></div>
+<div class="panel"><header>实时事件<span class="meta" style="color:var(--ok)">● LIVE</span></header>
+<div class="feed">
+<div class="ev"><span class="t">18:52:11</span><span class="body"><b>tool.call</b> shell.exec · <span style="color:var(--ok)">ok 200ms</span></span></div>
+<div class="ev"><span class="t">18:52:09</span><span class="body"><b>auth.deny</b> 操作员拒绝 fs.write 到 C:\\Windows</span></div>
+<div class="ev"><span class="t">18:51:58</span><span class="body"><b>engine.gen</b> 生成 412 tokens · 38 tok/s</span></div>
+<div class="ev"><span class="t">18:51:40</span><span class="body"><b>plugin.load</b> notes · 已启用</span></div>
+<div class="ev"><span class="t">18:51:32</span><span class="body"><b>chat.new</b> 新建会话 #20261019-003</span></div>
+<div class="ev"><span class="t">18:50:12</span><span class="body"><b>auth.request</b> MOSS 请求写入 temp.ps1</span></div>
+</div></div>
+</div>
+<div class="tri">
+<div class="panel"><header>系统资源 · 近 15 分钟<span class="meta">CPU / MEM / GPU</span></header><div class="pad">
+<svg class="res-chart" viewBox="0 0 620 130" preserveAspectRatio="none">
+<path d="M0,110 L40,105 L80,118 L120,95 L160,100 L200,82 L240,90 L280,70 L320,78 L360,60 L400,72 L440,55 L480,66 L520,50 L560,58 L620,48" fill="none" stroke="#E8443A" stroke-width="1.8"/>
+<path d="M0,80 L40,78 L80,82 L120,75 L160,72 L200,70 L240,68 L280,66 L320,64 L360,62 L400,60 L440,58 L480,56 L520,55 L560,54 L620,52" fill="none" stroke="#E8B34B" stroke-width="1.8" stroke-dasharray="3 3"/>
+<path d="M0,130 L40,128 L80,132 L120,125 L160,120 L200,118 L240,115 L280,112 L320,110 L360,108 L400,105 L440,102 L480,100 L520,98 L560,95 L620,92" fill="none" stroke="#4ED09A" stroke-width="1.8"/>
+</svg>
+<div style="display:flex;gap:18px;margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--ink-3)"><span>— CPU 37%</span><span>┄ MEM 62%</span><span>— GPU 41%</span></div>
+</div></div>
+<div class="panel"><header>插件<span class="meta">4 个已加载</span></header>
+<div class="plug-row"><div class="plug-ic">📝</div><div class="plug-meta"><b>notes</b><span>笔记读写 · 3 个工具</span></div><div class="switch on"></div></div>
+<div class="plug-row"><div class="plug-ic">⏱</div><div class="plug-meta"><b>clock</b><span>时间 / 计时 · 2 个工具</span></div><div class="switch on"></div></div>
+<div class="plug-row"><div class="plug-ic">📋</div><div class="plug-meta"><b>clipboard</b><span>剪贴板读写 · 2 个工具</span></div><div class="switch on"></div></div>
+<div class="plug-row"><div class="plug-ic">📦</div><div class="plug-meta"><b>sandbox-demo</b><span>沙箱示例 · 1 个工具</span></div><div class="switch"></div></div>
+</div>
+</div>
+</div>
+</section>
+<section class="view" id="view-chat">
+<div class="chat-wrap"><div class="chat-log">
+<div class="msg user"><span class="avatar">OP</span><div class="bubble"><div class="who">OPERATOR · 18:48:02</div><div class="text">查一下 CPU 和内存占用，然后把结果写到 D:\\logs\\sys.md</div></div></div>
+<div class="msg"><span class="avatar moss">M</span><div class="bubble"><div class="who"><b>MOSS</b> · 18:48:03</div><div class="text">已读取系统采样。当前 CPU 37%、内存 62%、GPU 41%。接下来我会调用 shell.exec 写入文件——这是一个需要授权的操作。</div><div class="tool-call"><span class="name">⟶ shell.exec</span><span>Get-Counter</span><span class="st">✓ 200ms</span></div><div class="tool-call" style="border-color:rgba(232,68,58,.4)"><span class="name" style="color:var(--accent)">⟶ fs.write</span><span>D:\\logs\\sys.md</span><span class="st" style="color:var(--accent)">⏸ 待审批</span></div></div></div>
+</div><div class="composer"><div class="composer-box"><textarea placeholder="给 MOSS 发消息"></textarea><div class="composer-bar"><span class="mode-pill">STANDARD</span><span class="hint">ENTER 发送</span><button class="btn primary">发送</button></div></div></div></div>
+</section>
+<section class="view" id="view-traj">
+<div class="panel"><header>轨迹审计<div class="seg" style="margin-left:auto"><span class="on">全部</span><span>工具调用</span><span>授权</span><span>错误</span></div></header>
+<table><thead><tr><th>时间</th><th>事件</th><th>详情</th><th>会话</th><th>状态</th></tr></thead><tbody>
+<tr><td class="num">18:52:11</td><td><span class="tag ok">tool.call</span></td><td>shell.exec · Get-Counter</td><td class="num">#003</td><td><span class="tag ok">ok</span></td></tr>
+<tr><td class="num">18:52:09</td><td><span class="tag bad">auth.deny</span></td><td>操作员拒绝 fs.write → C:\\Windows</td><td class="num">#003</td><td><span class="tag bad">denied</span></td></tr>
+<tr><td class="num">18:51:58</td><td><span class="tag mut">engine.gen</span></td><td>generate · 412 tokens · 38 tok/s</td><td class="num">#003</td><td><span class="tag ok">ok</span></td></tr>
+<tr><td class="num">18:50:12</td><td><span class="tag warn">auth.request</span></td><td>MOSS 请求 fs.write → temp.ps1</td><td class="num">#002</td><td><span class="tag warn">pending</span></td></tr>
+</tbody></table></div>
+</section>
+</div></main></div>
+<div class="scrim" id="scrim"></div>
+<div class="modal" id="authModal">
+<div class="kicker">AUTHORIZATION REQUIRED · 授权执行</div>
+<h3>MOSS 请求执行以下操作</h3>
+<p>该操作会修改文件系统。请核对参数后决定是否授权。</p>
+<pre>tool:    fs.write
+path:    D:\\scripts\\temp.ps1
+size:    2.1 KB
+reason:  每小时记录一次 CPU 温度
+caller:  session #20261019-002</pre>
+<div class="warn-note">⚠ MOSS 可能出错。请确认路径与大小后再授权。</div>
+<div class="acts"><button class="btn">拒绝</button><button class="btn primary">授权执行</button></div>
+</div>
+<script>
+function tick(){const d=new Date();const p=n=>String(n).padStart(2,'0');document.getElementById('clock').textContent=p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
+tick();setInterval(tick,1000);
+const views={dash:document.getElementById('view-dash'),chat:document.getElementById('view-chat'),traj:document.getElementById('view-traj')};
+const titles={dash:'总览',chat:'对话',traj:'轨迹审计'};
+document.querySelectorAll('.nav-item[data-view]').forEach(b=>b.onclick=()=>{const v=b.dataset.view;document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('on',x===b));Object.entries(views).forEach(([k,el])=>el.classList.toggle('on',k===v));document.getElementById('pageTitle').textContent=titles[v];});
+const scrim=document.getElementById('scrim'),modal=document.getElementById('authModal');
+function openAuth(o){scrim.classList.toggle('on',o);modal.classList.toggle('on',o)}
+scrim.onclick=()=>openAuth(false);
+document.querySelector('.chip.alert').onclick=()=>openAuth(true);
+document.querySelectorAll('.btn').forEach(b=>b.onclick=()=>{if(b.textContent.includes('授权')||b.textContent.includes('启动'))openAuth(true);else openAuth(false);});
+window.__UI_CAPTURE__={states:[{id:'dash'},{id:'auth',go:()=>openAuth(true)},{id:'chat',go:()=>document.querySelectorAll('.nav-item')[1].click()},{id:'traj',go:()=>document.querySelectorAll('.nav-item')[2].click()}]};
+</script>
+</body></html>
